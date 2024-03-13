@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th = "www.thymeleaf.org">
+<th:block th:replace = "~{/layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment = "content">
+        <h2> 영화 목록 </h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>제목&이미지</th>
+                <th>리뷰 개수</th>
+                <th>평점</th>
+                <th>등록일자</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="dto:${result.dtoList}">
+                <td>[[${dto.mno}]]</td>
+                <td>[[${dto.title}]]
+                <img th:if="${dto.imageDTOList.size() > 0 && dto.imageDTOList[0].path != null}" th:src = "|/display?fileName=${dto.imageDTOList[0].getThumbnailURL()}|"/>
+                </td>
+                <td>[[${dto.reviewCnt}]] </td>
+                <td>[[${#temporals.format(dto.regDate,'yyyy/MM/dd')}]]</td>
+            </tr>
+            </tbody>
+            <ul class="pagination h-100 justify-content align-items-center">
+                <li class="page-item " th:if="${result.prev}">
+                    <a class="page-link" th:href="@{/movie/list(page=${result.start-1},type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}" tabindex="-1">Previous</a>
+                </li>
+                <li th:each="page:${result.pageList}" th:class="'page-item '+${result.page==page? 'active':''}">
+                    <a class="page-link" th:href="@{/movie/list(page=${page},type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}">[[${page}]]</a>
+                </li>
+                <li class="page-item" th:if="${result.next}">
+                    <a class="page-link" th:href="@{/movie/list(page=${result.end+1},type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}" >Next</a>
+                </li>
+            </ul>
+        </table>
+    </th:block>
+</th:block>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="www.thymeleaf.org">
+<style>
+    .uploadResult {
+        width: 100%;
+        background: gray;
+        margin-top: 10px;
+    }
+
+    .uploadResult ul {
+        display: flex;
+        flex-flow: row;
+        justify-content: center;
+        vertical-align: top;
+    }
+
+    .uploadResult ul li {
+        list-style: none;
+        padding: 10px;
+    }
+
+    .uploadResult ul li img {
+        width: 100px;
+    }
+</style>
+<th:block th:replace="~{/layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <h2> 영화 등록 페이지 </h2>
+        <form th:action="@{/movie/register}" method="post">
+            <div class="form-group">
+                <label>title</label>
+                <input type="text" class="form-control" name="title"/>
+            </div>
+            <div class="form-group">
+                <label>Image Files</label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input files" id="fileInput" multiple="multiple"/>
+                    <label class="custom-file-label" data-browse="Browse"></label>
+                </div>
+            </div>
+            <div class="box">
+
+            </div>
+            <div class="uploadResult">
+                <ul></ul>
+            </div>
+            <button type="submit" class="btn btn-primary registerBtn">등록</button>
+        </form>
+    </th:block>
+</th:block>
+<script>
+    // html파일이 모두 로드되면 실행시키는 명령어
+    $(document).ready(function () {
+        // 파일 인풋이 변경되면 파일 업로드 요청
+        $(".custom-file-input").on("change", function () {
+            // split -> 지정한 값 기준으로 배열로 변경, pop() 배열의 마지막 index를 뺴서 변수에 할당
+            let fileName = $(this).val().split("\\").pop();
+            // siblings() -> 인접해있는 요소를 찾는 메소드(형제, 이웃)
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            console.log(fileName);
+            // 폼 생성(폼 데이터 할당)
+            let formData = new FormData();
+
+            let inputFile = $(this);
+            console.log(inputFile);
+            let files = inputFile[0].files;
+            let appended = false;
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append("uploadFiles", files[i]);
+                appended = true;
+            }
+            console.log(formData);
+            // form에 추가된 파일이 없을 경우 업로드 안하고 함수 종료
+            if (!appended) {
+                return;
+            }
+            // 업로드 요청
+            $.ajax({
+                url: "/uploadAjax",
+                processData: false,
+                contentType: false,
+                data: formData,
+                type: "post",
+                dataType: "json",
+                success: function (result) {
+                    console.log(result);
+                    showResult(result);
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            })
+        })
+
+        function showResult(arr) {
+            let str = "";
+            let uploadUl = $(".uploadResult ul")
+            $(arr).each(function (i, obj) {
+                str += "<li data-name='" + obj.fileName + "' data-path='" + obj.folderPath + "' data-uuid='" + obj.uuid + "'>";
+                str += "<div>";
+                str += "<button type = 'button' data-file='" + obj.imageURL + "' class='btn-warning btn-sm'>X</button>"
+                str += "<img src = '/display?fileName=" + obj.thumbnailURL + "'>";
+                str += "</div></li>";
+            })
+            uploadUl.append(str);
+        }
+
+        $(".uploadResult").on("click", "li button", function () {
+            let targetFile = $(this).data("file");
+            let targetLi = $(this).closest("li");
+            $.ajax({
+                url: "/removeFile",
+                data: {fileName: targetFile},
+                type: "post",
+                dataType: "text",
+                success: function (result) {
+                    alert(result);
+                    targetLi.remove();
+                }
+            })
+        })
+        // 전송버튼 클릭 시
+        $(".registerBtn").on("click", function (e) {
+            // submit 버튼 클릭 시 전송이 되므로, 해당 이벤트 제거
+            e.preventDefault();
+            let str = "";
+            // i - index(imageDTOList[0] 0댜산 i가 들어갈 예정, obj - 해당하는 li값을 받아온다.
+            $(".uploadResult li").each(function (i, obj) {
+                // target은 uploadResult 클래스의 li태그를 target으로 한다.
+                let target = $(obj);
+                // name은 MovieDTO의 imageDTO와 Mapping진행으로 변수값 동일하게 작성해야한다.
+                // value의 값은 커스텀 속성의 값을 가져오므로 커스텀 속성의 변수값과 동일하게 작성해야한다.
+                str += "<input type ='hidden' name = 'imageDTOList[" + i + "].imgName' value='" + target.data('name') + "' />";
+                str += "<input type ='hidden' name = 'imageDTOList[" + i + "].path' value='" + target.data('path') + "' />";
+                str += "<input type ='hidden' name = 'imageDTOList[" + i + "].uuid' value='" + target.data('uuid') + "' />";
+            })
+            $(".box").html(str);
+            // 전송되기 전에 위의 코드를 실행하고 전송 예정
+            $("form").submit();
+        })
+    })
+</script>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2> Upload Page </h2>
+    <input type = "file" multiple="multiple" id="fileId" name = "uploadFiles" />
+    <button class = "uploadBtn"> upload </button>
+    <!-- jQuery를 사용하기 전 script를 작성해야한다 구글검색 : jQuery CDN -->
+    <div class ="uploadResult">
+
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // 버튼 클릭하면 이벤트를 발생 시킨다.
+        $(".uploadBtn").click(function() {
+            //form 태그 생성
+            let formData = new FormData();
+            let inputFile = $("#fileId");
+            console.log(inputFile);
+            let files = inputFile[0].files;
+            for(let i=0; i<files.length; i++) {
+                console.log(files[i]);
+                formData.append("uploadFiles",files[i]);
+            }
+            // 업로드 요청
+            $.ajax({
+                url : "/uploadAjax", // 요청 경로
+                type : "post", // 전송메소드 타
+                data : formData, // 데이터 값
+                processData : false, // contentType : false로 지정할 때 사용 or multipart/form-data로 지정
+                contentType : false, // multipart/form-data타입을 사용하기 위한 용도 - 요청 데이터 타입
+                dataType : "json", // 응답 데이터 타입 지정
+                success : function(result) {
+                    console.log(result);
+                    showUploadImage(result);
+                },
+                error : function(err, textStatus){
+                    alert("파일 업로드에 실패했습니다." + textStatus);
+                }
+            });
+        })
+        // 화면 이미지 출력
+        function showUploadImage(arr) {
+            let divArea = $(".uploadResult");
+            let str = "";
+            for(let i=0; i<arr.length; i++) {
+                str += "<div>";
+                str += "<img src = '/display?fileName="+arr[i].thumbnailURL+"'/>";
+                str += "<button class ='removeBtn' data-name = '" + arr[i].imageURL+"'>remove</button></div>";
+            }
+            divArea.append(str);
+        }
+        // remove button event
+        $(".uploadResult").on("click",".removeBtn",function(){
+            let target = $(this); //event를 발생시킨 버튼을 target에 할당
+            let fileName = target.data("name"); // 커스텀 속성 (사용자가 속성을 추가할 수 있다 data- 원하는이름 / 값은 target.data("지정한 이름의 값") 값을 불러 올 수 있다.
+            console.log(fileName);
+            let targetDiv = $(this).closest("div");
+            $.ajax({
+                url: "/removeFile",
+                type: "post",
+                data : {fileName : fileName},
+                success : function(result) {
+                    if(result == true){
+                        targetDiv.remove();
+                    }
+                }
+            });
+        })
+    </script>
+</body>
+</html>
