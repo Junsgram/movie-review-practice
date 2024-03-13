@@ -7,10 +7,7 @@ import org.movie.movieproject.dto.PageRequestDTO;
 import org.movie.movieproject.service.MovieService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.lang.management.MemoryNotificationInfo;
@@ -40,4 +37,13 @@ public class MovieController {
     public void list(PageRequestDTO pageRequestDTO, Model model) {
         model.addAttribute("result" , movieService.getList(pageRequestDTO));
     }
+
+    @GetMapping({"/read", "/modify"})
+    public void read(@RequestParam(value = "mno")Long mno,
+                     @ModelAttribute("pageRequestDTO") PageRequestDTO pageRequestDTO, Model model) {
+        MovieDTO movieDTO = movieService.getMovie(mno);
+        model.addAttribute("dto", movieDTO);
+
+    }
+
 }
