@@ -65,6 +65,8 @@ public class MovieServiceImpl implements MovieService {
             MovieImage movieImage = (MovieImage) arr[1];
             movieImages.add(movieImage);
         });
-        return null;
+        Double avg = (Double) result.get(0)[2];
+        Long reviewCnt = (Long) result.get(0)[3];
+        return entityToDTO(movie, movieImages, avg, reviewCnt);
     }
 }
