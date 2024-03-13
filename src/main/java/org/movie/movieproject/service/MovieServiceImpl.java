@@ -55,7 +55,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public MovieDTO getMoive(Long mno) {
+    public MovieDTO getMovie(Long mno) {
         List<Object[]> result = movieRepository.getMovieWithAll2(mno);
         // List의 0번째 index는 movie객체로 이중배열 형태로 값을 받아와 할당할 수 있다.
         Movie movie = (Movie) result.get(0)[0];
@@ -65,6 +65,8 @@ public class MovieServiceImpl implements MovieService {
             MovieImage movieImage = (MovieImage) arr[1];
             movieImages.add(movieImage);
         });
-        return null;
+        Double avg = (Double) result.get(0)[2];
+        Long reviewCnt = (Long) result.get(0)[3];
+        return entityToDTO(movie, movieImages, avg, reviewCnt);
     }
 }

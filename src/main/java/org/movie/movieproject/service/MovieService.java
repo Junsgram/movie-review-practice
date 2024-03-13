@@ -18,7 +18,7 @@ public interface MovieService {
     // movie list
     PageResultDTO<MovieDTO, Object[]> getList(PageRequestDTO pageRequestDTO);
     // search
-    MovieDTO getMoive(Long mno);
+    MovieDTO getMovie(Long mno);
 
     // dto -> entity로 mapping
     // MovieDTO객체와, MovieImageDTO를 Entity로 변환하기 위해서 Map으로 리턴하여 값을 할당 및 리턴할 예정
